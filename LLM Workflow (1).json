@@ -1,0 +1,485 @@
+{
+  "name": "LLM Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Steps\n1.Read the Code related mails -> trigger\n2.Summarize the code using LLM \n3.Generate the comments for the code.\n4.Steps 2 &3 to be done in parallel.\n5. Merge the output of steps 2 & 3.\n6. Send the output to me as email.\n\n",
+        "height": 240,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1696,
+        -736
+      ],
+      "typeVersion": 1,
+      "id": "21f85039-9e62-403f-abd6-d60ce047a636",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "sender": "vishwasshanker8@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -1408,
+        -128
+      ],
+      "id": "8dabbf14-204c-43ab-a602-88cc3925598d",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QRbK4Fl5R6Wk3aHz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Given the Code Below\nCode:\n {{ $json.text }}\nGenerate us summary of what is code does in very \nsimple language. Do note the summary should \ncontain all the important details are in the code so that i lnow what is code about quick glance   ",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are an expert in python. You have the ability to summarize code in simple language and have the knack to cover important details in the summary. "
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -1104,
+        112
+      ],
+      "id": "293c320d-494b-4042-9361-4cd2682bcbd2",
+      "name": "Code_Summary2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Given the Code below \nCode:{{ $json.text }}\n\n\nGenerate Comments for the code so that i can understand what each line of the code Does.\nNote: Do not Modify the exixting code lines at all.\nJust add the comments whereever required.\n\n",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You are a helpful assistant and know how to write code in python .You can help me understand  the code by adding comments to it.  "
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -1104,
+        -368
+      ],
+      "id": "60d30127-57d9-4fdf-9610-8c056f4b3178",
+      "name": "Comment"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        -176
+      ],
+      "id": "e1dc9de8-5a59-4127-b2fb-47266f80ec05",
+      "name": "NVIDIA Nemotron Chat Model",
+      "credentials": {
+        "nvidiaApi": {
+          "id": "ddm9SBKsBmc5mx58",
+          "name": "NVIDIA Nemotron account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        320
+      ],
+      "id": "39591d80-fbcc-41ea-b5c0-f4ce096c6bb9",
+      "name": "NVIDIA Nemotron Chat Model1",
+      "credentials": {
+        "nvidiaApi": {
+          "id": "ddm9SBKsBmc5mx58",
+          "name": "NVIDIA Nemotron account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -736,
+        -144
+      ],
+      "id": "5a2ad9aa-bb67-4d56-ac52-9975290527d8",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        -144
+      ],
+      "id": "fd3fbb6a-0ca0-43d8-96cf-95f9922f9aa4",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "sendTo": "balwantverma55555@gmail.com",
+        "subject": "Code Summary and Comments",
+        "message": "={{ $json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        -160
+      ],
+      "id": "6f66d2c3-0a96-41e6-b841-b1bb5faae03b",
+      "name": "Send a message",
+      "webhookId": "17924e75-aebc-468c-b96a-160b69c10a86",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QRbK4Fl5R6Wk3aHz",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7922977b-b035-449e-9967-e9da7369da5f",
+              "name": "Message",
+              "value": "=Code with Comments:\n{{ $json.text[0] }}\n\nCode Summary:\n{{ $json.text[1] }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -224,
+        -144
+      ],
+      "id": "962d5bdf-0746-4e01-9084-927400aa7409",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Convert this message into a HTML format.\nInclude proper Code blocks whenever necessary. The code block should have syntax highlighting for the specific language used in the code.\n\nMessage:\n{{ $json.Message }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You can convert any message into HTML format that can be sent on mail to the user."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -16,
+        -144
+      ],
+      "id": "f47dfb4c-efb7-4aed-b6f7-b1d92258687f",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatNvidia",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        80
+      ],
+      "id": "98e57e31-4ec1-445f-be08-5db47b9f7001",
+      "name": "NVIDIA Nemotron Chat Model2",
+      "credentials": {
+        "nvidiaApi": {
+          "id": "ddm9SBKsBmc5mx58",
+          "name": "NVIDIA Nemotron account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Gmail Trigger": [
+      {
+        "json": {
+          "id": "19ee61bc24007abc",
+          "threadId": "19ee61b6ce3f0fd4",
+          "labelIds": [
+            "UNREAD",
+            "IMPORTANT",
+            "SENT",
+            "INBOX"
+          ],
+          "sizeEstimate": 4234,
+          "headers": {
+            "mime-version": "MIME-Version: 1.0",
+            "date": "Date: Sat, 20 Jun 2026 23:07:18 +0530",
+            "message-id": "Message-ID: <CAE2ZbQbFojidaR+g2AJwsXxjmo+G2XB7yAR0GTDk3j2=9=MbKw@mail.gmail.com>",
+            "subject": "Subject: Flight cancellations are broken. I think I know how to fix them.",
+            "from": "From: Vishwas vishwas <vishwasshanker8@gmail.com>",
+            "to": "To: Vishwas vishwas <vishwasshanker8@gmail.com>",
+            "content-type": "Content-Type: multipart/alternative; boundary=\"0000000000006dd3a40654b2dc1e\""
+          },
+          "html": "<div dir=\"ltr\">Subject: Flight cancellations are broken. I think I know how to fix them.<br><br>Every day, two things happen simultaneously on Indian flights:<br><br>Rahul cancels a ₹6,000 ticket and walks away with ₹3,000 after airline fees.<br>Priya books the same seat last-minute for ₹11,000.<br><br>Rahul lost ₹3,000. Priya overpaid by ₹5,000. The airline pocketed the difference.<br><br>What if they could just exchange directly?<br><br>Rahul recovers ₹5,000–6,000. Priya pays ₹7,000–8,000. Both win. Zero waste.<br><br>This gap shouldn&#39;t exist in 2026 — and I&#39;m building the layer that closes it.<br><br>I&#39;m Vishwas, a student at IIT Indore. I&#39;m exploring a peer-to-peer travel marketplace where:<br>→ Sellers list unused tickets before cancelling<br>→ Buyers find last-minute inventory at fair prices<br>→ PNR verification + escrow payments protect both sides<br>→ Smart rebooking automation handles cases where direct transfer isn&#39;t permitted<br><br>This isn&#39;t another OTA. It&#39;s a direct exchange layer between travelers — so value flows between people, not into airline cancellation fees.<br><br>I&#39;m currently deep in research — airline policies, transfer eligibility, fraud prevention, marketplace trust systems.<br><br>I&#39;d love 15 minutes of your time, or even just a reply with your honest take:<br>→ Where does this break down legally or technically?<br>→ Has something like this been seriously attempted before?<br>→ What am I missing that isn&#39;t obvious from the outside?<br><br>Brutal feedback welcome. That&#39;s the only kind worth having.<br><br>Best,<br>Vishwas<br>IIT Indore<br></div>\n",
+          "text": "Subject: Flight cancellations are broken. I think I know how to fix them.\n\nEvery day, two things happen simultaneously on Indian flights:\n\nRahul cancels a ₹6,000 ticket and walks away with ₹3,000 after airline fees.\nPriya books the same seat last-minute for ₹11,000.\n\nRahul lost ₹3,000. Priya overpaid by ₹5,000. The airline pocketed the\ndifference.\n\nWhat if they could just exchange directly?\n\nRahul recovers ₹5,000–6,000. Priya pays ₹7,000–8,000. Both win. Zero waste.\n\nThis gap shouldn't exist in 2026 — and I'm building the layer that closes\nit.\n\nI'm Vishwas, a student at IIT Indore. I'm exploring a peer-to-peer travel\nmarketplace where:\n→ Sellers list unused tickets before cancelling\n→ Buyers find last-minute inventory at fair prices\n→ PNR verification + escrow payments protect both sides\n→ Smart rebooking automation handles cases where direct transfer isn't\npermitted\n\nThis isn't another OTA. It's a direct exchange layer between travelers — so\nvalue flows between people, not into airline cancellation fees.\n\nI'm currently deep in research — airline policies, transfer eligibility,\nfraud prevention, marketplace trust systems.\n\nI'd love 15 minutes of your time, or even just a reply with your honest\ntake:\n→ Where does this break down legally or technically?\n→ Has something like this been seriously attempted before?\n→ What am I missing that isn't obvious from the outside?\n\nBrutal feedback welcome. That's the only kind worth having.\n\nBest,\nVishwas\nIIT Indore\n",
+          "textAsHtml": "<p>Subject: Flight cancellations are broken. I think I know how to fix them.</p><p>Every day, two things happen simultaneously on Indian flights:</p><p>Rahul cancels a &#x20B9;6,000 ticket and walks away with &#x20B9;3,000 after airline fees.<br/>Priya books the same seat last-minute for &#x20B9;11,000.</p><p>Rahul lost &#x20B9;3,000. Priya overpaid by &#x20B9;5,000. The airline pocketed the<br/>difference.</p><p>What if they could just exchange directly?</p><p>Rahul recovers &#x20B9;5,000&ndash;6,000. Priya pays &#x20B9;7,000&ndash;8,000. Both win. Zero waste.</p><p>This gap shouldn&apos;t exist in 2026 &mdash; and I&apos;m building the layer that closes<br/>it.</p><p>I&apos;m Vishwas, a student at IIT Indore. I&apos;m exploring a peer-to-peer travel<br/>marketplace where:<br/>&rarr; Sellers list unused tickets before cancelling<br/>&rarr; Buyers find last-minute inventory at fair prices<br/>&rarr; PNR verification + escrow payments protect both sides<br/>&rarr; Smart rebooking automation handles cases where direct transfer isn&apos;t<br/>permitted</p><p>This isn&apos;t another OTA. It&apos;s a direct exchange layer between travelers &mdash; so<br/>value flows between people, not into airline cancellation fees.</p><p>I&apos;m currently deep in research &mdash; airline policies, transfer eligibility,<br/>fraud prevention, marketplace trust systems.</p><p>I&apos;d love 15 minutes of your time, or even just a reply with your honest<br/>take:<br/>&rarr; Where does this break down legally or technically?<br/>&rarr; Has something like this been seriously attempted before?<br/>&rarr; What am I missing that isn&apos;t obvious from the outside?</p><p>Brutal feedback welcome. That&apos;s the only kind worth having.</p><p>Best,<br/>Vishwas<br/>IIT Indore</p>",
+          "subject": "Flight cancellations are broken. I think I know how to fix them.",
+          "date": "2026-06-20T17:37:18.000Z",
+          "to": {
+            "value": [
+              {
+                "address": "vishwasshanker8@gmail.com",
+                "name": "Vishwas vishwas"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Vishwas vishwas</span> &lt;<a href=\"mailto:vishwasshanker8@gmail.com\" class=\"mp_address_email\">vishwasshanker8@gmail.com</a>&gt;</span>",
+            "text": "\"Vishwas vishwas\" <vishwasshanker8@gmail.com>"
+          },
+          "from": {
+            "value": [
+              {
+                "address": "vishwasshanker8@gmail.com",
+                "name": "Vishwas vishwas"
+              }
+            ],
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Vishwas vishwas</span> &lt;<a href=\"mailto:vishwasshanker8@gmail.com\" class=\"mp_address_email\">vishwasshanker8@gmail.com</a>&gt;</span>",
+            "text": "\"Vishwas vishwas\" <vishwasshanker8@gmail.com>"
+          },
+          "messageId": "<CAE2ZbQbFojidaR+g2AJwsXxjmo+G2XB7yAR0GTDk3j2=9=MbKw@mail.gmail.com>"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Merge": [
+      {
+        "json": {
+          "text": "However, I must point out that **there is no code provided** in your message for me to add comments to. The text appears to be a pitch or an inquiry related to a project concept for a peer-to-peer travel marketplace, specifically addressing flight ticket exchanges to avoid airline cancellation fees.\n\nGiven the absence of code, I'll provide a structured response based on your request's format, followed by a speculative example of how comments might be added to a hypothetical piece of code related to your project, since no actual code was provided.\n\n### Response Structure as Requested (with no code to comment on)\n\n#### **Original Code & Comments**\n*No code provided to add comments to.*\n\n#### **Explanation and Speculative Code Example with Comments**\n\nSince no code was provided, here's a **speculative example** of a Python script that might relate to the project's core idea (ticket price comparison and exchange benefit calculation), with comments explaining each part:\n\n```python\n# =====================================================\n# Speculative Example: Ticket Exchange Benefit Calculator\n# (NOT PROVIDED IN ORIGINAL QUESTION, CREATED FOR ILLUSTRATION)\n# =====================================================\n\n# Define a function to calculate the benefit of direct exchange\ndef calculate_exchange_benefit(original_price, cancellation_fee, last_minute_price):\n    \"\"\"\n    Calculates benefits for both buyer and seller in a direct ticket exchange scenario.\n    \n    Parameters:\n    - original_price (float): Original ticket price\n    - cancellation_fee (float): Fee for cancelling the ticket through the airline\n    - last_minute_price (float): Price a buyer is willing to pay last-minute\n    \n    Returns:\n    - tuple: (Seller Benefit, Buyer Savings)\n    \"\"\"\n    # Calculate how much the seller recovers by not using the airline cancellation\n    seller_recovery = original_price - cancellation_fee\n    \n    # Calculate the seller's actual gain in the direct exchange (assuming they get the full recovery)\n    # FOR ILLUSTRATION: In the scenario, Rahul recovers ₹5,000–6,000 from ₹6,000 ticket\n    seller_benefit = seller_recovery  # Simplified for example\n    \n    # Calculate how much the buyer saves compared to the last-minute price\n    # FOR ILLUSTRATION: Priya pays ₹7,000–8,000 instead of ₹11,000\n    buyer_savings = last_minute_price - (seller_recovery + (last_minute_price - seller_recovery)/2)  # Simplified midpoint for illustration\n    \n    return seller_benefit, buyer_savings\n\n# Example usage with hypothetical values based on the scenario description\nif __name__ == \"__main__\":\n    original_ticket_price = 6000  # ₹6,000\n    airline_cancellation_fee = 3000  # ₹3,000 fee\n    last_minute_bookings_price = 11000  # ₹11,000\n    \n    seller_gain, buyer_savings = calculate_exchange_benefit(original_ticket_price, airline_cancellation_fee, last_minute_bookings_price)\n    \n    print(f\"Seller Benefit: ₹{seller_gain}\") \n    print(f\"Buyer Savings: ₹{buyer_savings}\")\n```\n\n#### **How to Proceed**\n\n1. **Provide Actual Code**: Share the specific code related to your project where you'd like comments added for clarity.\n2. **Project Discussion (Optional)**: If you'd like, we can discuss the project's aspects you've inquired about (legal, technical, previous attempts, overlooked aspects) in the comments below this response.\n\n**Please respond with the actual code for commented clarification.**\n\n---\n\n### **Awaiting Code Response Template for Your Convenience**\n\nOnce you provide the code, I'll fill in the below format:\n\n#### **Original Code & Comments**\n\n```python\n# YOUR CODE HERE\n# COMMENTS WILL BE ADDED HERE BASED ON YOUR PROVIDED CODE\n```\n\n#### **Explanation of Key Sections (if necessary)**\n\n*Detailed explanations for complex sections, if any, will be provided here.*\n\n#### **Project Discussion (if requested)**\n\n*Answers to your project-related inquiries will be addressed here.* \n\n### Please paste the actual code below this line for me to add comments:\n\n```\n[PASTE YOUR CODE HERE]\n```"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "text": "It seems there's been a misunderstanding. You've provided a **text passage** (an email/account description) instead of **code**. Given this, I'll provide a summary of the **text passage** in simple language, highlighting all important details for a quick glance. Since there's no code to summarize, I'll also offer a hypothetical outline of what **code for the described system** might entail at the end, in case that's of interest.\n\n### Summary of the Text Passage (Not Code)\n\n**Topic:** Concept for a Peer-to-Peer Travel Marketplace for Unused Flight Tickets\n\n**Key Points:**\n\n1. **Problem Statement**:\n   - **Rahul's Loss**: Cancels a ₹6,000 ticket, gets ₹3,000 back (loses ₹3,000).\n   - **Priya's Overpayment**: Buys the same ticket last-minute for ₹11,000 (overpays by ₹5,000).\n   - **Airline's Gain**: Profits from the difference.\n\n2. **Proposed Solution**:\n   - **Direct Exchange Platform** for buyers and sellers of unused flight tickets.\n   - **Features**:\n     - **Sellers** list unused tickets.\n     - **Buyers** find last-minute deals at fair prices.\n     - **Security Measures**:\n       - PNR Verification\n       - Escrow Payments\n     - **Automation** for rebooking when direct transfers aren’t permitted.\n\n3. **About the Author**:\n   - **Name**: Vishwas\n   - **Affiliation**: Student at IIT Indore\n   - **Current Stage**: Research (airline policies, fraud prevention, trust systems)\n\n4. **Request**:\n   - Seeking feedback/advice on:\n     - **Legal/Technical Breakdowns**\n     - **Prior Similar Attempts**\n     - **Overlooked Aspects**\n\n### Hypothetical Outline for Code Summary (If Code Existed for the Described System)\n\n**Assuming Code Exists for the Peer-to-Peer Flight Ticket Exchange Platform**\n\n#### **Code Summary (Hypothetical)**\n\n**System Name:** PeerFlight Exchange\n\n**Code Overview:**\n\n1. **Modules:**\n   - **User Authentication & Profile Management**\n   - **Ticket Listing & Search Engine**\n   - **PNR Verification System**\n   - **Escrow Payment Gateway**\n   - **Smart Rebooking Automation**\n   - **Fraud Detection & Prevention**\n\n2. **Key Functions:**\n   - **`list_ticket(ticket_details)`**: Sellers can list unused tickets.\n   - **`search_ticket(criteria)`**: Buyers can search for tickets based on various criteria.\n   - **`verify_pnr(ticket_id)`**: Verifies the PNR number for authenticity.\n   - **`process_escrow(transaction)`**: Manages secure payments.\n   - **`auto_rebook(failed_transaction)`**: Automates rebooking when necessary.\n\n3. **Technologies Used (Speculative):**\n   - **Backend:** Python (e.g., Flask/Django)\n   - **Database:** Relational (e.g., MySQL) for structured ticket/data management\n   - **Frontend:** Reactive Framework (e.g., React) for dynamic user interface\n   - **Payments:** Integration with a secure payment API (e.g., Stripe)\n   - **Automation/ML (for Fraud Detection):** Libraries like Scikit-learn or TensorFlow\n\n4. **Security Measures Highlighted in Code:**\n   - **Encryption** for sensitive data (PNR, Payment Details)\n   - **Access Controls** for user actions (listing, purchasing)\n   - **Logging & Monitoring** for fraud detection and system integrity\n\n### To Actually Receive a Code Summary:\n\nPlease provide the **code** related to the described Peer-to-Peer travel marketplace, and I'll be delighted to offer a detailed summary in simple language, covering all important details for a quick glance."
+        },
+        "pairedItem": {
+          "item": 0,
+          "input": 1
+        }
+      }
+    ],
+    "Aggregate": [
+      {
+        "json": {
+          "text": [
+            "However, I must point out that **there is no code provided** in your message for me to add comments to. The text appears to be a pitch or an inquiry related to a project concept for a peer-to-peer travel marketplace, specifically addressing flight ticket exchanges to avoid airline cancellation fees.\n\nGiven the absence of code, I'll provide a structured response based on your request's format, followed by a speculative example of how comments might be added to a hypothetical piece of code related to your project, since no actual code was provided.\n\n### Response Structure as Requested (with no code to comment on)\n\n#### **Original Code & Comments**\n*No code provided to add comments to.*\n\n#### **Explanation and Speculative Code Example with Comments**\n\nSince no code was provided, here's a **speculative example** of a Python script that might relate to the project's core idea (ticket price comparison and exchange benefit calculation), with comments explaining each part:\n\n```python\n# =====================================================\n# Speculative Example: Ticket Exchange Benefit Calculator\n# (NOT PROVIDED IN ORIGINAL QUESTION, CREATED FOR ILLUSTRATION)\n# =====================================================\n\n# Define a function to calculate the benefit of direct exchange\ndef calculate_exchange_benefit(original_price, cancellation_fee, last_minute_price):\n    \"\"\"\n    Calculates benefits for both buyer and seller in a direct ticket exchange scenario.\n    \n    Parameters:\n    - original_price (float): Original ticket price\n    - cancellation_fee (float): Fee for cancelling the ticket through the airline\n    - last_minute_price (float): Price a buyer is willing to pay last-minute\n    \n    Returns:\n    - tuple: (Seller Benefit, Buyer Savings)\n    \"\"\"\n    # Calculate how much the seller recovers by not using the airline cancellation\n    seller_recovery = original_price - cancellation_fee\n    \n    # Calculate the seller's actual gain in the direct exchange (assuming they get the full recovery)\n    # FOR ILLUSTRATION: In the scenario, Rahul recovers ₹5,000–6,000 from ₹6,000 ticket\n    seller_benefit = seller_recovery  # Simplified for example\n    \n    # Calculate how much the buyer saves compared to the last-minute price\n    # FOR ILLUSTRATION: Priya pays ₹7,000–8,000 instead of ₹11,000\n    buyer_savings = last_minute_price - (seller_recovery + (last_minute_price - seller_recovery)/2)  # Simplified midpoint for illustration\n    \n    return seller_benefit, buyer_savings\n\n# Example usage with hypothetical values based on the scenario description\nif __name__ == \"__main__\":\n    original_ticket_price = 6000  # ₹6,000\n    airline_cancellation_fee = 3000  # ₹3,000 fee\n    last_minute_bookings_price = 11000  # ₹11,000\n    \n    seller_gain, buyer_savings = calculate_exchange_benefit(original_ticket_price, airline_cancellation_fee, last_minute_bookings_price)\n    \n    print(f\"Seller Benefit: ₹{seller_gain}\") \n    print(f\"Buyer Savings: ₹{buyer_savings}\")\n```\n\n#### **How to Proceed**\n\n1. **Provide Actual Code**: Share the specific code related to your project where you'd like comments added for clarity.\n2. **Project Discussion (Optional)**: If you'd like, we can discuss the project's aspects you've inquired about (legal, technical, previous attempts, overlooked aspects) in the comments below this response.\n\n**Please respond with the actual code for commented clarification.**\n\n---\n\n### **Awaiting Code Response Template for Your Convenience**\n\nOnce you provide the code, I'll fill in the below format:\n\n#### **Original Code & Comments**\n\n```python\n# YOUR CODE HERE\n# COMMENTS WILL BE ADDED HERE BASED ON YOUR PROVIDED CODE\n```\n\n#### **Explanation of Key Sections (if necessary)**\n\n*Detailed explanations for complex sections, if any, will be provided here.*\n\n#### **Project Discussion (if requested)**\n\n*Answers to your project-related inquiries will be addressed here.* \n\n### Please paste the actual code below this line for me to add comments:\n\n```\n[PASTE YOUR CODE HERE]\n```",
+            "It seems there's been a misunderstanding. You've provided a **text passage** (an email/account description) instead of **code**. Given this, I'll provide a summary of the **text passage** in simple language, highlighting all important details for a quick glance. Since there's no code to summarize, I'll also offer a hypothetical outline of what **code for the described system** might entail at the end, in case that's of interest.\n\n### Summary of the Text Passage (Not Code)\n\n**Topic:** Concept for a Peer-to-Peer Travel Marketplace for Unused Flight Tickets\n\n**Key Points:**\n\n1. **Problem Statement**:\n   - **Rahul's Loss**: Cancels a ₹6,000 ticket, gets ₹3,000 back (loses ₹3,000).\n   - **Priya's Overpayment**: Buys the same ticket last-minute for ₹11,000 (overpays by ₹5,000).\n   - **Airline's Gain**: Profits from the difference.\n\n2. **Proposed Solution**:\n   - **Direct Exchange Platform** for buyers and sellers of unused flight tickets.\n   - **Features**:\n     - **Sellers** list unused tickets.\n     - **Buyers** find last-minute deals at fair prices.\n     - **Security Measures**:\n       - PNR Verification\n       - Escrow Payments\n     - **Automation** for rebooking when direct transfers aren’t permitted.\n\n3. **About the Author**:\n   - **Name**: Vishwas\n   - **Affiliation**: Student at IIT Indore\n   - **Current Stage**: Research (airline policies, fraud prevention, trust systems)\n\n4. **Request**:\n   - Seeking feedback/advice on:\n     - **Legal/Technical Breakdowns**\n     - **Prior Similar Attempts**\n     - **Overlooked Aspects**\n\n### Hypothetical Outline for Code Summary (If Code Existed for the Described System)\n\n**Assuming Code Exists for the Peer-to-Peer Flight Ticket Exchange Platform**\n\n#### **Code Summary (Hypothetical)**\n\n**System Name:** PeerFlight Exchange\n\n**Code Overview:**\n\n1. **Modules:**\n   - **User Authentication & Profile Management**\n   - **Ticket Listing & Search Engine**\n   - **PNR Verification System**\n   - **Escrow Payment Gateway**\n   - **Smart Rebooking Automation**\n   - **Fraud Detection & Prevention**\n\n2. **Key Functions:**\n   - **`list_ticket(ticket_details)`**: Sellers can list unused tickets.\n   - **`search_ticket(criteria)`**: Buyers can search for tickets based on various criteria.\n   - **`verify_pnr(ticket_id)`**: Verifies the PNR number for authenticity.\n   - **`process_escrow(transaction)`**: Manages secure payments.\n   - **`auto_rebook(failed_transaction)`**: Automates rebooking when necessary.\n\n3. **Technologies Used (Speculative):**\n   - **Backend:** Python (e.g., Flask/Django)\n   - **Database:** Relational (e.g., MySQL) for structured ticket/data management\n   - **Frontend:** Reactive Framework (e.g., React) for dynamic user interface\n   - **Payments:** Integration with a secure payment API (e.g., Stripe)\n   - **Automation/ML (for Fraud Detection):** Libraries like Scikit-learn or TensorFlow\n\n4. **Security Measures Highlighted in Code:**\n   - **Encryption** for sensitive data (PNR, Payment Details)\n   - **Access Controls** for user actions (listing, purchasing)\n   - **Logging & Monitoring** for fraud detection and system integrity\n\n### To Actually Receive a Code Summary:\n\nPlease provide the **code** related to the described Peer-to-Peer travel marketplace, and I'll be delighted to offer a detailed summary in simple language, covering all important details for a quick glance."
+          ]
+        },
+        "pairedItem": [
+          {
+            "item": 0
+          },
+          {
+            "item": 1
+          }
+        ]
+      }
+    ],
+    "Edit Fields": [
+      {
+        "json": {
+          "Message": "Code with Comments:\nHowever, I must point out that **there is no code provided** in your message for me to add comments to. The text appears to be a pitch or an inquiry related to a project concept for a peer-to-peer travel marketplace, specifically addressing flight ticket exchanges to avoid airline cancellation fees.\n\nGiven the absence of code, I'll provide a structured response based on your request's format, followed by a speculative example of how comments might be added to a hypothetical piece of code related to your project, since no actual code was provided.\n\n### Response Structure as Requested (with no code to comment on)\n\n#### **Original Code & Comments**\n*No code provided to add comments to.*\n\n#### **Explanation and Speculative Code Example with Comments**\n\nSince no code was provided, here's a **speculative example** of a Python script that might relate to the project's core idea (ticket price comparison and exchange benefit calculation), with comments explaining each part:\n\n```python\n# =====================================================\n# Speculative Example: Ticket Exchange Benefit Calculator\n# (NOT PROVIDED IN ORIGINAL QUESTION, CREATED FOR ILLUSTRATION)\n# =====================================================\n\n# Define a function to calculate the benefit of direct exchange\ndef calculate_exchange_benefit(original_price, cancellation_fee, last_minute_price):\n    \"\"\"\n    Calculates benefits for both buyer and seller in a direct ticket exchange scenario.\n    \n    Parameters:\n    - original_price (float): Original ticket price\n    - cancellation_fee (float): Fee for cancelling the ticket through the airline\n    - last_minute_price (float): Price a buyer is willing to pay last-minute\n    \n    Returns:\n    - tuple: (Seller Benefit, Buyer Savings)\n    \"\"\"\n    # Calculate how much the seller recovers by not using the airline cancellation\n    seller_recovery = original_price - cancellation_fee\n    \n    # Calculate the seller's actual gain in the direct exchange (assuming they get the full recovery)\n    # FOR ILLUSTRATION: In the scenario, Rahul recovers ₹5,000–6,000 from ₹6,000 ticket\n    seller_benefit = seller_recovery  # Simplified for example\n    \n    # Calculate how much the buyer saves compared to the last-minute price\n    # FOR ILLUSTRATION: Priya pays ₹7,000–8,000 instead of ₹11,000\n    buyer_savings = last_minute_price - (seller_recovery + (last_minute_price - seller_recovery)/2)  # Simplified midpoint for illustration\n    \n    return seller_benefit, buyer_savings\n\n# Example usage with hypothetical values based on the scenario description\nif __name__ == \"__main__\":\n    original_ticket_price = 6000  # ₹6,000\n    airline_cancellation_fee = 3000  # ₹3,000 fee\n    last_minute_bookings_price = 11000  # ₹11,000\n    \n    seller_gain, buyer_savings = calculate_exchange_benefit(original_ticket_price, airline_cancellation_fee, last_minute_bookings_price)\n    \n    print(f\"Seller Benefit: ₹{seller_gain}\") \n    print(f\"Buyer Savings: ₹{buyer_savings}\")\n```\n\n#### **How to Proceed**\n\n1. **Provide Actual Code**: Share the specific code related to your project where you'd like comments added for clarity.\n2. **Project Discussion (Optional)**: If you'd like, we can discuss the project's aspects you've inquired about (legal, technical, previous attempts, overlooked aspects) in the comments below this response.\n\n**Please respond with the actual code for commented clarification.**\n\n---\n\n### **Awaiting Code Response Template for Your Convenience**\n\nOnce you provide the code, I'll fill in the below format:\n\n#### **Original Code & Comments**\n\n```python\n# YOUR CODE HERE\n# COMMENTS WILL BE ADDED HERE BASED ON YOUR PROVIDED CODE\n```\n\n#### **Explanation of Key Sections (if necessary)**\n\n*Detailed explanations for complex sections, if any, will be provided here.*\n\n#### **Project Discussion (if requested)**\n\n*Answers to your project-related inquiries will be addressed here.* \n\n### Please paste the actual code below this line for me to add comments:\n\n```\n[PASTE YOUR CODE HERE]\n```\n\nCode Summary:\nIt seems there's been a misunderstanding. You've provided a **text passage** (an email/account description) instead of **code**. Given this, I'll provide a summary of the **text passage** in simple language, highlighting all important details for a quick glance. Since there's no code to summarize, I'll also offer a hypothetical outline of what **code for the described system** might entail at the end, in case that's of interest.\n\n### Summary of the Text Passage (Not Code)\n\n**Topic:** Concept for a Peer-to-Peer Travel Marketplace for Unused Flight Tickets\n\n**Key Points:**\n\n1. **Problem Statement**:\n   - **Rahul's Loss**: Cancels a ₹6,000 ticket, gets ₹3,000 back (loses ₹3,000).\n   - **Priya's Overpayment**: Buys the same ticket last-minute for ₹11,000 (overpays by ₹5,000).\n   - **Airline's Gain**: Profits from the difference.\n\n2. **Proposed Solution**:\n   - **Direct Exchange Platform** for buyers and sellers of unused flight tickets.\n   - **Features**:\n     - **Sellers** list unused tickets.\n     - **Buyers** find last-minute deals at fair prices.\n     - **Security Measures**:\n       - PNR Verification\n       - Escrow Payments\n     - **Automation** for rebooking when direct transfers aren’t permitted.\n\n3. **About the Author**:\n   - **Name**: Vishwas\n   - **Affiliation**: Student at IIT Indore\n   - **Current Stage**: Research (airline policies, fraud prevention, trust systems)\n\n4. **Request**:\n   - Seeking feedback/advice on:\n     - **Legal/Technical Breakdowns**\n     - **Prior Similar Attempts**\n     - **Overlooked Aspects**\n\n### Hypothetical Outline for Code Summary (If Code Existed for the Described System)\n\n**Assuming Code Exists for the Peer-to-Peer Flight Ticket Exchange Platform**\n\n#### **Code Summary (Hypothetical)**\n\n**System Name:** PeerFlight Exchange\n\n**Code Overview:**\n\n1. **Modules:**\n   - **User Authentication & Profile Management**\n   - **Ticket Listing & Search Engine**\n   - **PNR Verification System**\n   - **Escrow Payment Gateway**\n   - **Smart Rebooking Automation**\n   - **Fraud Detection & Prevention**\n\n2. **Key Functions:**\n   - **`list_ticket(ticket_details)`**: Sellers can list unused tickets.\n   - **`search_ticket(criteria)`**: Buyers can search for tickets based on various criteria.\n   - **`verify_pnr(ticket_id)`**: Verifies the PNR number for authenticity.\n   - **`process_escrow(transaction)`**: Manages secure payments.\n   - **`auto_rebook(failed_transaction)`**: Automates rebooking when necessary.\n\n3. **Technologies Used (Speculative):**\n   - **Backend:** Python (e.g., Flask/Django)\n   - **Database:** Relational (e.g., MySQL) for structured ticket/data management\n   - **Frontend:** Reactive Framework (e.g., React) for dynamic user interface\n   - **Payments:** Integration with a secure payment API (e.g., Stripe)\n   - **Automation/ML (for Fraud Detection):** Libraries like Scikit-learn or TensorFlow\n\n4. **Security Measures Highlighted in Code:**\n   - **Encryption** for sensitive data (PNR, Payment Details)\n   - **Access Controls** for user actions (listing, purchasing)\n   - **Logging & Monitoring** for fraud detection and system integrity\n\n### To Actually Receive a Code Summary:\n\nPlease provide the **code** related to the described Peer-to-Peer travel marketplace, and I'll be delighted to offer a detailed summary in simple language, covering all important details for a quick glance.\n"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Comment",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code_Summary2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NVIDIA Nemotron Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Comment",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NVIDIA Nemotron Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Code_Summary2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comment": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code_Summary2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NVIDIA Nemotron Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0e030fd4-649a-476e-892c-265d73c0e627",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "81d0f6244888b9908743c7f39b1c8dd841d675ab8c950c78e3652f682c8fa455"
+  },
+  "nodeGroups": [],
+  "id": "Fl7XQt2Yf8An3kBv",
+  "tags": []
+}
