@@ -24,24 +24,24 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                                                                   │
-│   📧 Gmail Trigger  (polls every minute)                         │
-│          │                                                        │
-│    ┌─────┴──────┐                                                │
+│                                                                 │
+│   📧 Gmail Trigger  (polls every minute)                        |
+│          │                                                      │
+│    ┌─────┴──────┐                                               │
 │    │            │         ← runs in PARALLEL ⚡                 │
-│    ▼            ▼                                                 │
+│    ▼            ▼                                               │
 │ ┌──────────┐ ┌──────────────┐                                   │
-│ │ 💬Comment│ │ 📝 Code      │   NVIDIA Nemotron LLM            │
-│ │  Agent   │ │  Summary     │                                    │
+│ │ 💬Comment│ │ 📝 Code      │   NVIDIA Nemotron LLM             │
+│ │  Agent   │ │  Summary     │                                   │
 │ └────┬─────┘ └──────┬───────┘                                   │
-│      │               │                                            │
-│      └──────┬─────────┘                                          │
-│             ▼                                                     │
+│      │               │                                          │
+│      └──────┬─────────┘                                         │
+│             ▼                                                   │
 │         🔀 Merge  →  📦 Aggregate  →  ✏️ Edit Fields            │
-│             │                                                     │
-│             ▼                                                     │
+│             │                                                   │
+│             ▼                                                   │
 │      🤖 Final LLM Chain  →  📤 Send Gmail Reply                 │
-│                                                                   │
+│                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
