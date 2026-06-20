@@ -233,12 +233,6 @@ git push origin feature/amazing-feature
 
 ---
 
-## 📄 License
-
-Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more information.
-
----
-
 <div align="center">
 
 **Made with ❤️ using n8n + NVIDIA Nemotron**
