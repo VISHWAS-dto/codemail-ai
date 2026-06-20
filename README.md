@@ -22,11 +22,9 @@
 
 ## 🎬 Workflow Architecture
 
-```
 
 <img width="1272" height="1066" alt="Screenshot 2026-06-21 at 12 46 17 AM" src="https://github.com/user-attachments/assets/278369d0-f07f-40b6-b1d3-00206c654364" />
 
-```
 
 ---
 
