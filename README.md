@@ -5,12 +5,6 @@
 > ### 🚀 *Send code. Get clarity. Automatically.*
 > An intelligent n8n automation that watches your Gmail for code-related emails, runs **parallel AI analysis** using NVIDIA Nemotron LLM, and delivers a structured code summary + inline comments back to your inbox — **hands-free.**
 
-<br/>
-
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=6366F1&center=true&vCenter=true&width=600&lines=📧+Receive+code+via+Gmail...;🤖+AI+analyzes+in+parallel...;💬+Generates+inline+comments...;📝+Writes+plain-English+summary...;📤+Sends+report+back+to+you!" alt="Typing SVG" />
-
-</div>
-
 ---
 
 ## 🌟 What Is This?
